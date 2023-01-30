@@ -1,0 +1,105 @@
+---
+title: "328_final_project"
+author: "Greg Morton"
+date: "5/9/2022"
+output: html_document
+---
+Data Memo: “labor_bot” Slack Bot 
+```{r}
+library(leaflet)
+library(leaflet.providers)
+library(rgeocodio)
+library(data.table)
+library(packcircles)
+library(ggmap)
+library(tidyverse)
+library(rvest)
+library(janitor)
+library(dplyr)
+library(DBI)
+library(RSQLite)
+library(data.table)
+library(lubridate)
+library(knitr)
+library(remotes)
+library(slackr)
+
+
+```
+
+# The Why: 
+
+We, as Americans, spend an inordinate amount of time at work.  Work defines large parts of our identities, dictates our financial situations, and plays a large role in both community building and social stratification.  
+
+I find labor unions really fascinating because they involve community building and people coming together in their shared interest.  Labor unions also (especially in recent years) have provide a chance for working class people to weild political power in a way in which they are not often able.
+
+Conversely, union busting is also interesting, especially when viewed in the aggregate as this app attempts to, because I'm interested in all the dirty business and moral grey area stuff that goes into maintaining a profit margin. 
+
+I don't think this app tells a thorough story about unionization, union busting, or the mistreatment people face at work, but it attempts to give the user a look into each.  
+
+# The Data: 
+
+The data for this project was sourced from Forrest Gregg’s nlrb-data page on Github, which performs a daily scrape of the NLRB’s website for new case information, election news, and other labor data.  For my app, I chose to draw on allegations of NLRA violations because I think the ways in which people are mistreated at work should be news and even more than that should be studied to find underlying trends in union busting and abuse of power in the modern American workplace.  
+
+Getting the data was quite easy.  Since it lives as a SQL database on Forrest’s Github account I was able to write a simple R web scraper with rvest to extract the content of Forrest’s database daily.  Unfortunately this means my app is also subject to the same downtime as its scraper is, a limitation that reared its ugly head this weekend when NLRB’s case database went down this weekend and my bot went down with it.  
+
+Initially I struggled with how to store such a large file.  Forrest’s DB file was nearly a gigabyte in size and far too big to be stored on github.  To work around this, my scraper stores the db file in a temp directory that it disposes of when the bot has completed its task.  
+
+Cleaning and formatting the data was a little bit of a chore.  To produce the final message my slack bot sends each morning, I had to create about a dozen different objects and ensure that each would not only update every day, but form a coherent sentence regardless of the day’s events.  
+
+# The App:
+
+My app is currently a slackbot that produces a daily message summarizing NLRA Violations allegations from the week.  The bot tweets out the total number of violations, puts them into context by comparing that number to the number of allegations from the same week the year before, summarizes the most common allegations, and invites the user to check out more details on each allegation on NLRB’s website. 
+I feel that the current iteration of the app gives a nice top-down view of the data.  It immediately gives the user an idea of the most common NLRA violations and an idea of the trajectory of working conditions more generally by comparing the number of allegations year-over-year.  
+
+The message my bot tweets out is dynamically generated within my R script and changes according to the circumstances of the day. 
+
+```{r}
+
+read_rds("data/this_week_allegations_text.rds")
+
+this_week_allegations
+
+
+```
+# Stuff I’m Add + Stuff I’d Like To Add:
+
+While I’m pretty satisfied with my slack bot as an internal tool for reporters who are interested in specific NLRA violations or looking at NLRA violations in the aggregate, I think it, as currently constructed, provides insufficient context to most readers who might be interested.  
+
+I’ve tried to rectify this in ways that didn’t 100% come off this time, but I plan to integrate into future versions of this project.  
+
+## The Map/Dashboard View
+	
+I BADLY wanted the slack version of the app to have an interactive component.  People able to more easily connect these incidents to their own lives if they are able to make geographic connections. 
+
+I settled on using the leaflet R package to accomplish this goal.  It’s pretty lightweight, it doesn’t require an API key, and it would allow me to embed my (daily updating) map into an .RMD document that could function as a pseudo-dashboard hosted through github pages.  I was able to produce a dynamic map that will update every day, but unfortunately I couldn’t get the knitting right to produce the .RMD file.  I don’t think I was far off so I’ll definitely be taking another crack at this in the upcoming weeks.
+```{r}
+read_rds("data/this_week_map.rds")
+
+this_week_map
+
+```
+
+## The Heatmap
+
+I wanted a way to visualize the change in number of allegations month-over-month by state.  I settled on a heatmap (although a line graph also probably would’ve worked fine).  The results were meh.  
+
+The issue here is that I still have to scale the results per-100k so NY and California don’t look like obvious outliers by virtue of being the two largest states.  
+
+```{r}
+read_rds("data/this_year_heatmap.rds")
+
+read_rds("data/heatmap_matrix.rds")
+
+heatmap(heatmap_matrix, Rowv=NA, Colv=NA, col = cm.colors(256), scale="none", margins=c(5,10))
+
+```
+
+
+# The Future of labor_bot
+
+I am NOT done.  My plan is still to deploy the dashboard and some version of the bot to twitter using their API and posting weekly recaps of NLRA violation allegations.  I’d also like to expand my app’s functionality to labor election data.  I whipped up a quick dataset that I plan to use to visualize union election results.  I’d like to incorporate the bubble plot as a means to visualize votes.  
+
+
+
+
