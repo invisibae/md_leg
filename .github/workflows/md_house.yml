@@ -13,12 +13,20 @@ jobs:
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
       DOC_URL: ${{ secrets.DOC_URL }}
 
-
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@main
-      - uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r@main
+      - name: Download geckodriver
+        run: |
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-macos.tar.gz
+          tar -xvzf geckodriver-v0.27.0-macos.tar.gz
+          mv geckodriver /usr/local/bin/
+      - name: setup firefox 
+        uses: browser-actions/setup-firefox@v1
+      - name: Firefox version
+        run: firefox --version
       - name: Install packages
         run: |
           R -e 'install.packages("dplyr")'
@@ -40,4 +48,5 @@ jobs:
         run: git add --all
       - name: commit
         run: git commit
-
+      - name: push
+        run: git push -U origin main
