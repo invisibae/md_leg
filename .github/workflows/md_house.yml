@@ -3,63 +3,62 @@ name: md_house
 on:
   push:
   schedule:
-  - cron: "0 8-18 * * *"
+  - cron: "0 8-18 * * *" # runs every hour from 8 am - 6 pm
 workflow_dispatch:
 
 jobs:
   autoscrape:
-    env:
-      SLACK_INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
-      SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
-      SLACK_USERNAME: ${{ secrets.SLACK_USERNAME }}
-      SLACK_ICON_EMOJI: ${{ secrets.ICON_EMOJI }}
-      SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-      GGMAP_GOOGLE_API_KEY: ${{ secrets.GGMAP_GOOGLE_API_KEY }}
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@master
-      - uses: r-lib/actions/setup-r@master
-      - name: setup firefox
-        uses: browser-actions/setup-firefox@v1
-        run: firefox --version
+  env:
+  SLACK_INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_INCOMING_WEBHOOK_URL }}
+  SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
+  SLACK_USERNAME: ${{ secrets.SLACK_USERNAME }}
+  SLACK_ICON_EMOJI: ${{ secrets.ICON_EMOJI }}
+  SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+  GGMAP_GOOGLE_API_KEY: ${{ secrets.GGMAP_GOOGLE_API_KEY }}
+
+runs-on: macos-latest
+
+steps:
+  - uses: actions/checkout@master
+  - uses: r-lib/actions/setup-r@master
+  - name: setup firefox 
+    uses: browser-actions/setup-firefox@v1
+  - run: firefox --version
+
+jobs:
   build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        firefox: [ '84.0', 'latest-beta', 'latest-devedition', 'latest-esr', 'latest' ]
-    name: Firefox ${{ matrix.firefox }} sample
-    steps:
-      - name: Setup firefox
-        uses: browser-actions/setup-firefox@v1
-        with:
-          firefox-version: ${{ matrix.firefox }}
-      - run: firefox --version
-      - name: Install packages
-        run: |
-          R -e 'install.packages("dplyr")'
-          R -e 'install.packages("stringr")'
-          R -e 'install.packages("readr")'
-          R -e 'install.packages("RSelenium")'
-          R -e 'install.packages("rvest")'
-          R -e 'install.packages("furrr")'
-          R -e 'install.packages("janitor")'
-          R -e 'install.packages("googlesheets4")'
-          R -e 'install.packages("slackr")'
-      - name: print env variables
-        run: |
-          echo ${{ secrets.SLACK_USERNAME }}
-      - name: scrape - r
-        run: Rscript md_leg_scraper.R
-      - name: fetch
-        run: git fetch
-      - name: pull
-        run: git pull
-      - name: add
-        run: git add --all
-      - name: commit
-        run: |-
-          git config user.name "Automated"
-          git config user.email "actions@users.noreply.github.com"
-          git commit -m "Latest data ${timestamp}"
-      - name: push
-        run: git push
+  runs-on: ubuntu-latest
+strategy:
+  matrix:
+  firefox: [ '84.0', 'latest-beta', 'latest-devedition', 'latest-esr', 'latest' ]
+name: Firefox ${{ matrix.firefox }} sample
+steps:
+  - name: Setup firefox
+    uses: browser-actions/setup-firefox@v1
+    with:
+      firefox-version: ${{ matrix.firefox }}
+  - run: firefox --version
+  - name: Install packages
+    run: |
+      R -e 'install.packages("dplyr")'
+      R -e 'install.packages("stringr")'
+      R -e 'install.packages("readr")'
+      R -e 'install.packages("RSelenium")'
+      R -e 'install.packages("rvest")'
+      R -e 'install.packages("furrr")'
+      R -e 'install.packages("janitor")'
+      R -e 'install.packages("googlesheets4")'
+      R -e 'install.packages("slackr")'
+  - name: print env variables
+    run: |
+      echo ${{ secrets.SLACK_USERNAME }}
+  - name: scrape - r
+    run: Rscript md_leg_scraper.R
+  - name: fetch
+    run: git fetch
+  - name: pull
+    run: git pull
+  - name: add
+    run: git add --all
+  - name: commit
+    run: |-
