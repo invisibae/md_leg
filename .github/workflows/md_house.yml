@@ -36,6 +36,10 @@ jobs:
       - name: Install packages
         run: |
           R -e 'install.packages("dplyr")'
+          R -e 'install.packages("curl")'
+          R -e 'install.packages("gargle")'
+          R -e 'install.packages("httr")'
+          R -e 'install.packages("googledrive")'
           R -e 'install.packages("stringr")'
           R -e 'install.packages("readr")'
           R -e 'install.packages("RSelenium")'
