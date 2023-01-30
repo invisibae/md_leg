@@ -4,7 +4,6 @@ on:
   push:
   schedule:
   - cron: "0 8-18 * * *" # runs every hour from 8 am - 6 pm
-workflow_dispatch:
 
 jobs:
   autoscrape:
