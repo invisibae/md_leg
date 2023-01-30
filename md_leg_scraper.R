@@ -18,7 +18,17 @@ library(slackr)
 
 # start scraping  --------------------------------------------------------
 
-rD <- rsDriver(browser="chrome", port=5559L, verbose=F)
+rD <- rsDriver(browser = "firefox", 
+               port = 5559L,
+               version = "latest",
+               chromever = "latest", 
+               geckover = "latest", 
+               extraCapabilities = list("moz:firefoxOptions" = list(
+                 args = list('--headless')))
+               )
+
+?rsDriver
+
 remDr <- rD[["client"]]
 
 ## break glass in case of emergencies: 
@@ -155,7 +165,7 @@ sheet_write(test_table,
 
 sheet_write(new_stuff, 
             ss = Sys.getenv("DOC_URL"),
-            sheet = "all_current_bills"
+            sheet = "new_stuff_and_changes"
             )
 
 
@@ -187,11 +197,6 @@ if (identical(test_table, old_table) == FALSE) {
 
 
 # Shut our ports down and close out the show ---------------------------------------
-
-# this one closes the browser window
-remDr$close()
-
-
 # this one stops the session so we can re-use the port 
 rD$server$stop()
 
