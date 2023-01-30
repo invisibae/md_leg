@@ -27,7 +27,6 @@ rD <- rsDriver(browser = "firefox",
                verbose = F
                )
 
-?rsDriver
 
 remDr <- rD[["client"]]
 
