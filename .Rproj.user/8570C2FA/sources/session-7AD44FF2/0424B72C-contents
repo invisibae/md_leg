@@ -18,7 +18,7 @@ library(slackr)
 
 # start scraping  --------------------------------------------------------
 
-rD <- rsDriver(browser="firefox", port=5559L, verbose=F)
+rD <- rsDriver(browser="chrome", port=5559L, verbose=F)
 remDr <- rD[["client"]]
 
 ## break glass in case of emergencies: 
@@ -145,7 +145,7 @@ write_rds(test_table, "data/old_table.rds")
 # Update slack with info on new/changed bills  ----------------------------
 
 # authenticate gs4 
-gs4_auth(path = Sys.getenv("KEY_PATH"))
+gs4_auth(path = "keys/md-house-google-credential.json")
 
 # overwrite sheets
 sheet_write(test_table, 
@@ -180,7 +180,6 @@ if (identical(test_table, old_table) == FALSE) {
              token = Sys.getenv("SLACK_TOKEN"),
              channel = Sys.getenv("SLACK_CHANNEL"),
              username = Sys.getenv("SLACK_USERNAME"),
-             icon_emoji = Sys.getenv("SLACK_ICON_EMOJI"),
              thread_ts = NULL,
              reply_broadcast = FALSE)
   
