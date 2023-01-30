@@ -31,13 +31,9 @@ jobs:
 strategy:
   matrix:
   firefox: [ '84.0', 'latest-beta', 'latest-devedition', 'latest-esr', 'latest' ]
-name: Firefox ${{ matrix.firefox }} sample
-steps:
-  - name: Setup firefox
-    uses: browser-actions/setup-firefox@v1
-    with:
-      firefox-version: ${{ matrix.firefox }}
-  - run: firefox --version
+- name: setup firefox 
+  uses: browser-actions/setup-firefox@v1
+  run: firefox --version
   - name: Install packages
     run: |
       R -e 'install.packages("dplyr")'
@@ -49,9 +45,6 @@ steps:
       R -e 'install.packages("janitor")'
       R -e 'install.packages("googlesheets4")'
       R -e 'install.packages("slackr")'
-  - name: print env variables
-    run: |
-      echo ${{ secrets.SLACK_USERNAME }}
   - name: scrape - r
     run: Rscript md_leg_scraper.R
   - name: fetch
