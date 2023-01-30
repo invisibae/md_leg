@@ -24,7 +24,7 @@ jobs:
           tar -xvzf geckodriver-v0.32.0-macos.tar.gz
           mv geckodriver /usr/local/bin/
       - name: Setup firefox
-        uses: browser-actions/setup-firefox@v1
+        uses: browser-actions/setup-firefox@v2
         with:
           firefox-version: ${{ matrix.firefox }}
       - run: firefox --version
