@@ -23,7 +23,7 @@ rD <- rsDriver(browser = "firefox",
                chromever = "latest", 
                geckover = "latest", 
                extraCapabilities = list("moz:firefoxOptions" = list(
-                 args = list('--headless'))).
+                 args = list('--headless'))),
                verbose = F
                )
 

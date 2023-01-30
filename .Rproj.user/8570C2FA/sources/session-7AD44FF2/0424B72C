@@ -3,9 +3,9 @@
     "path": "~/Documents/GitHub/md_leg/md_leg_scraper.R",
     "project_path": "md_leg_scraper.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "3974885668",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1674568480705.0,
     "source_on_save": false,
     "relative_order": 1,
@@ -18,11 +18,11 @@
         "docOutlineVisible": "1"
     },
     "folds": "",
-    "lastKnownWriteTime": 1675056859,
+    "lastKnownWriteTime": 1675057300,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1675057056259,
+    "last_content_update": 1675057300195,
     "read_only": false,
     "read_only_alternatives": []
 }
