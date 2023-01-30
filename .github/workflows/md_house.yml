@@ -23,10 +23,11 @@ jobs:
           wget https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-macos.tar.gz
           tar -xvzf geckodriver-v0.27.0-macos.tar.gz
           mv geckodriver /usr/local/bin/
-      - name: setup firefox 
+      - name: Setup firefox
         uses: browser-actions/setup-firefox@v1
-      - name: Firefox version
-        run: firefox --version
+        with:
+          firefox-version: ${{ matrix.firefox }}
+      - run: firefox --version
       - name: Install packages
         run: |
           R -e 'install.packages("dplyr")'
