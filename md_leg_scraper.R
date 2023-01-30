@@ -18,7 +18,7 @@ library(slackr)
 
 # start scraping  --------------------------------------------------------
 
-rD <- rsDriver(browser="firefox", port=5559L, verbose=F)
+rD <- rsDriver(browser="chrome", port=5559L, verbose=F)
 remDr <- rD[["client"]]
 
 ## break glass in case of emergencies: 
