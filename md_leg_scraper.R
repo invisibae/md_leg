@@ -19,7 +19,6 @@ library(slackr)
 # start scraping  --------------------------------------------------------
 
 rD <- rsDriver(browser = "firefox", 
-               port = 5559L,
                version = "latest",
                chromever = "latest", 
                geckover = "latest", 
