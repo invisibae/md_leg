@@ -18,18 +18,22 @@ library(slackr)
 
 # start scraping  --------------------------------------------------------
 
+rD <- remoteDriver()
+
+
 rD <- rsDriver(browser = "firefox", 
                version = "latest",
                chromever = "latest", 
                geckover = "latest", 
-               extraCapabilities = list("moz:firefoxOptions" = list(
-                 args = list('--headless'))),
-               verbose = F
-               )
+               verbose = F,
+               iedriver = NULL
+)
 
 
 remDr <- rD[["client"]]
 
+require(RSelenium)
+checkFor
 ## break glass in case of emergencies: 
 
 # for a very worst case where we forget to close the server 
