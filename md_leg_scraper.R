@@ -16,7 +16,15 @@ library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
 
+#Others 
+library(remotes) 
+
+remove.packages("wdman") 
+
+install_version("wdman", "0.2.6")
+
 # start scraping  --------------------------------------------------------
+
 
 rD <- remoteDriver()
 
@@ -25,15 +33,14 @@ rD <- rsDriver(browser = "firefox",
                version = "latest",
                chromever = "latest", 
                geckover = "latest", 
-               verbose = F,
-               iedriver = NULL
+               verbose = F
 )
 
 
 remDr <- rD[["client"]]
 
-require(RSelenium)
-checkFor
+
+
 ## break glass in case of emergencies: 
 
 # for a very worst case where we forget to close the server 
@@ -42,10 +49,10 @@ checkFor
 # rm(rD)
 
 # this one stops the session so we can re-use the port 
-# rD$server$stop()
+rD$server$stop()
 
 # this one closes the browser window
-# remDr$close()
+remDr$close()
 
 
 # our scraper elements ---------------------------------------------------------
