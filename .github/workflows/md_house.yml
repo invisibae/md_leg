@@ -43,6 +43,7 @@ jobs:
           R -e 'install.packages("janitor")'
           R -e 'install.packages("googlesheets4")'
           R -e 'install.packages("slackr")'
+          R -e 'install.packages("remotes")'
       - name: scrape - r
         run: Rscript md_leg_scraper.R
       - name: fetch
