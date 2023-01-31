@@ -20,8 +20,8 @@ library(slackr)
 library(remotes) 
 
 remove.packages("wdman") 
-
 install_version("wdman", "0.2.6")
+library(wdman)
 
 # start scraping  --------------------------------------------------------
 
