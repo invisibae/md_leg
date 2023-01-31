@@ -13,7 +13,7 @@ jobs:
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
       DOC_URL: ${{ secrets.DOC_URL }}
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@main
