@@ -22,10 +22,9 @@ library(slackr)
 
 
 # the broken bit
-rD <- rsDriver(browser = "firefox", 
+rD <- rsDriver(browser = "chrome", 
                version = "latest",
                chromever = "latest", 
-               geckover = "latest", 
                verbose = T
 )
 
@@ -38,14 +37,14 @@ remDr <- rD[["client"]]
 
 # for a very worst case where we forget to close the server 
 # 
-# rD <- rsDriver()
-# rm(rD)
+rD <- rsDriver()
+rm(rD)
 
-# this one stops the session so we can re-use the port 
-# rD$server$stop()
+# this one stops the session so we can re-use the port
+rD$server$stop()
 
 # this one closes the browser window
-# remDr$close()
+remDr$close()
 
 
 # our scraper elements ---------------------------------------------------------
