@@ -16,6 +16,8 @@ library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
 
+
+
 # start scraping  --------------------------------------------------------
 
 
@@ -24,7 +26,7 @@ rD <- rsDriver(browser = "firefox",
                version = "latest",
                chromever = "latest", 
                geckover = "latest", 
-               verbose = F
+               verbose = T
 )
 
 
