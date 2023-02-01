@@ -17,7 +17,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v2
-      - uses: r-lib/actions/setup-r@main
+      - uses: r-lib/actions/setup-r@latest
       - uses: browser-actions/setup-firefox@latest 
       - run: firefox --version 
       - name: Install RSelenium package 
