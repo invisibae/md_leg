@@ -13,7 +13,7 @@ jobs:
       SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
       DOC_URL: ${{ secrets.DOC_URL }}
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@main
@@ -23,11 +23,6 @@ jobs:
         with:
           firefox-version: ${{ matrix.firefox }}
       - run: firefox --version
-      - name: Cache R packages
-        uses: actions/cache@v2
-        with:
-          path: /usr/local/lib/R/site-library
-          key: R-site-library-${{ hashFiles('**/DESCRIPTION') }}
       - name: Install packages
         run: |
           R -e 'install.packages("dplyr")'
@@ -44,6 +39,12 @@ jobs:
           R -e 'install.packages("googlesheets4")'
           R -e 'install.packages("slackr")'
           R -e 'install.packages("remotes")'
+          
+      - name: Cache R packages
+        uses: actions/cache@v2
+        with:
+          path: /usr/local/lib/R/site-library
+          key: R-site-library-${{ hashFiles('**/DESCRIPTION') }}
       - name: scrape - r
         run: Rscript md_leg_scraper.R
       - name: fetch
