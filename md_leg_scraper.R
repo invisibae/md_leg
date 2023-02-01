@@ -22,9 +22,8 @@ library(slackr)
 
 
 # the broken bit
-rD <- rsDriver(browser = "chrome", 
+rD <- rsDriver(browser = "firefox", 
                version = "latest",
-               chromever = "latest", 
                verbose = T
 )
 
@@ -37,14 +36,14 @@ remDr <- rD[["client"]]
 
 # for a very worst case where we forget to close the server 
 # 
-rD <- rsDriver()
-rm(rD)
+# rD <- rsDriver()
+# rm(rD)
 
 # this one stops the session so we can re-use the port
-rD$server$stop()
+# rD$server$stop()
 
 # this one closes the browser window
-remDr$close()
+# remDr$close()
 
 
 # our scraper elements ---------------------------------------------------------
@@ -61,6 +60,8 @@ Sys.sleep(2)
 vignette("basics", package = "RSelenium")
 
 base_html <- remDr$getPageSource()[[1]]
+
+
 
 test_table <- read_html(base_url) %>% 
   html_table() %>% 
