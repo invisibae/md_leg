@@ -16,19 +16,10 @@ library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
 
-#Others 
-library(remotes) 
-
-remove.packages("wdman") 
-install_version("wdman", "0.2.6")
-library(wdman)
-
 # start scraping  --------------------------------------------------------
 
 
-rD <- remoteDriver()
-
-
+# the broken bit
 rD <- rsDriver(browser = "firefox", 
                version = "latest",
                chromever = "latest", 
@@ -49,10 +40,10 @@ remDr <- rD[["client"]]
 # rm(rD)
 
 # this one stops the session so we can re-use the port 
-rD$server$stop()
+# rD$server$stop()
 
 # this one closes the browser window
-remDr$close()
+# remDr$close()
 
 
 # our scraper elements ---------------------------------------------------------
@@ -66,6 +57,7 @@ remDr$navigate(base_url)
 
 # save page html and grab the table 
 Sys.sleep(2) 
+vignette("basics", package = "RSelenium")
 
 base_html <- remDr$getPageSource()[[1]]
 
