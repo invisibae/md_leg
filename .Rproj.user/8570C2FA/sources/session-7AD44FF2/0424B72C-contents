@@ -22,7 +22,7 @@ library(slackr)
 
 
 # the broken bit
-rD <- rsDriver(browser = "chrome", 
+rD <- rsDriver(browser = "firefox", 
                version = "latest",
                chromever = "latest", 
                verbose = T
