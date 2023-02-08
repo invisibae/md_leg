@@ -68,7 +68,7 @@ remDr$navigate(base_url)
 
 # save page html and grab the table 
 Sys.sleep(2) 
-vignette("basics", package = "RSelenium")
+
 
 base_html <- remDr$getPageSource()[[1]]
 
