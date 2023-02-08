@@ -23,7 +23,6 @@ jobs:
         with:
           distribution: 'zulu' # See 'Supported distributions' for available options
           java-version: '17'
-      - run: java HelloWorldApp.java
       - uses: browser-actions/setup-geckodriver@latest
         with: 
           token: ${{ secrets.GITHUB_TOKEN }}
