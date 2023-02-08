@@ -15,10 +15,9 @@ library(janitor)
 library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
-library(wdman)
+##
+# library(wdman)
 
-selServ <- wdman::selenium(retcommand = TRUE, verbose = FALSE)
-cat(selServ)
 
 
 
@@ -29,17 +28,16 @@ cat(selServ)
 selServ <- wdman::selenium(verbose = FALSE)
 selServ$log()
 
+# 
+# rD <- rsDriver(browser = "firefox", 
+#                version = "3.141.59",
+#                verbose = T
+# )
+# 
+# 
+# remDr <- rD[["client"]]
 
-rD <- rsDriver(browser = "firefox", 
-               version = "latest",
-               verbose = T,
-               
-)
 
-library(-wd)
-remDr <- rD[["client"]]
-
-head(remDr$sessionInfo)
 
 
 
@@ -214,6 +212,7 @@ if (identical(test_table, old_table) == FALSE) {
 # Shut our ports down and close out the show ---------------------------------------
 # this one stops the session so we can re-use the port 
 rD$server$stop()
+
 
 
 
