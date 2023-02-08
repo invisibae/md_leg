@@ -17,36 +17,32 @@ library(googlesheets4)
 library(slackr)
 library(wdman)
 
-selServ <- wdman::selenium(retcommand = TRUE, verbose = FALSE)
-cat(selServ)
 
 
 
 # start scraping  --------------------------------------------------------
 
+# Learn about RSelenium 
+vignette("basics", package = "RSelenium")
 
-# the broken bit
-selServ <- wdman::selenium(verbose = FALSE)
-selServ$log()
-
-
-rD <- rsDriver(browser = "firefox", 
-               version = "latest",
+# start up our server 
+rD <- rsDriver(browser = "firefox",
                verbose = T,
+               port = 10101L
                
 )
 
-library(-wd)
+
 remDr <- rD[["client"]]
 
-head(remDr$sessionInfo)
+
 
 
 
 ## break glass in case of emergencies: 
 
 # for a very worst case where we forget to close the server 
-# 
+
 # rD <- rsDriver()
 # rm(rD)
 
@@ -68,7 +64,7 @@ remDr$navigate(base_url)
 
 # save page html and grab the table 
 Sys.sleep(2) 
-vignette("basics", package = "RSelenium")
+
 
 base_html <- remDr$getPageSource()[[1]]
 
@@ -142,79 +138,10 @@ test_table <- test_table %>%
   ) %>% 
   clean_names()
 
-# Do an anti-join to find out which bills have changed --------------------
-
-# read in old version of our table 
-
-old_table <- read_rds("data/old_table.rds")
-
-
-# perform anti-join
-new_stuff <- 
-  test_table %>% 
-  anti_join(old_table)
-
-# write csv file to replace the one in the 'data' folder ------------------
-
-fold <- 'data/'
-
-# get all files in the directories, recursively
-f <- list.files(fold, include.dirs = F, full.names = T, recursive = T)
-# remove the files
-file.remove(f)
-
-# save our most recent table as the "old_table"
-write_rds(test_table, "data/old_table.rds")
-
-
-# Update slack with info on new/changed bills  ----------------------------
-
-# authenticate gs4 
-gs4_auth(path = "keys/md-house-google-credential.json")
-
-# overwrite sheets
-sheet_write(test_table, 
-           ss = Sys.getenv("DOC_URL"),
-           sheet = "all_current_bills"
-           )
-
-sheet_write(new_stuff, 
-            ss = Sys.getenv("DOC_URL"),
-            sheet = "new_stuff_and_changes"
-            )
-
-
-# define message to post to slack 
-
-doc <- Sys.getenv("DOC_URL")
-
-message <- 
-  paste0("New info on", " ", nrow(new_stuff)," bill(s).", " Read more here:", " ", doc)
-
-# Post to slack 
-if (identical(test_table, old_table) == FALSE) {
-  slackr_msg(txt = message,
-             token = Sys.getenv("SLACK_TOKEN"),
-             channel = Sys.getenv("SLACK_CHANNEL"),
-             username = Sys.getenv("SLACK_USERNAME"),
-             thread_ts = NULL,
-             reply_broadcast = FALSE
-  )
-} else {
-  slackr_msg(txt = "No new updates :cry:",
-             token = Sys.getenv("SLACK_TOKEN"),
-             channel = Sys.getenv("SLACK_CHANNEL"),
-             username = Sys.getenv("SLACK_USERNAME"),
-             thread_ts = NULL,
-             reply_broadcast = FALSE)
-  
-}
-
 
 # Shut our ports down and close out the show ---------------------------------------
 # this one stops the session so we can re-use the port 
 rD$server$stop()
-
 
 
 # Done! -------------------------------------------------------------------
