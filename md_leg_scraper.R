@@ -32,8 +32,7 @@ library(slackr)
 
 rD <- rsDriver(browser = "firefox",
                verbose = T,
-               port = 1017L,
-               chromever = NULL
+               chromever = NULL,
                )
 
 
