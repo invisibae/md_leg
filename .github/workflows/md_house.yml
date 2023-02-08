@@ -47,7 +47,7 @@ jobs:
           R -e 'install.packages("googlesheets4")'
           R -e 'install.packages("slackr")'
           R -e 'install.packages("remotes")'
-          
+           R -e 'install.packages("binman")'      
       - name: Cache R packages
         uses: actions/cache@v2
         with:
