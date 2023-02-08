@@ -22,12 +22,18 @@ library(slackr)
 
 
 # start scraping  --------------------------------------------------------
+suppressWarnings(tryCatch(rm(remDr),error=function(e){}))
+suppressWarnings(tryCatch(rD),error=function(e){})
+gc()
 
+#relaunch
+library(RSelenium)
 
 # the broken bit
 
 rD <- rsDriver(browser = "firefox",
-               verbose = T
+               verbose = T,
+               port = 1017L
                )
 
 rD$server
@@ -46,7 +52,7 @@ remDr <- rD[["client"]]
 # rm(rD)
 
 # this one stops the session so we can re-use the port
-# rD$server$stop()
+rD$server$stop()
 
 # this one closes the browser window
 # remDr$close()
