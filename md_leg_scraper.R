@@ -30,10 +30,12 @@ library(slackr)
 # library(RSelenium)
 
 # the broken bit
+binman::list_versions("seleniumserver")
 
 rD <- rsDriver(browser = "firefox",
                verbose = T,
-               port = 1017L
+               port = 1017L,
+               chromever = NULL
                )
 
 rD$server
@@ -52,7 +54,7 @@ remDr <- rD[["client"]]
 # rm(rD)
 
 # this one stops the session so we can re-use the port
-rD$server$stop()
+# rD$server$stop()
 
 # this one closes the browser window
 # remDr$close()
