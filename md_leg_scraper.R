@@ -22,12 +22,12 @@ library(slackr)
 
 
 # start scraping  --------------------------------------------------------
-suppressWarnings(tryCatch(rm(remDr),error=function(e){}))
-suppressWarnings(tryCatch(rD),error=function(e){})
-gc()
+# suppressWarnings(tryCatch(rm(remDr),error=function(e){}))
+# suppressWarnings(tryCatch(rD),error=function(e){})
+# gc()
 
 #relaunch
-library(RSelenium)
+# library(RSelenium)
 
 # the broken bit
 
