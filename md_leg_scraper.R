@@ -25,17 +25,14 @@ library(slackr)
 
 
 # the broken bit
-selServ <- wdman::selenium(verbose = FALSE)
-selServ$log()
 
-# 
-# rD <- rsDriver(browser = "firefox", 
-#                version = "3.141.59",
-#                verbose = T
-# )
-# 
-# 
-# remDr <- rD[["client"]]
+rD <- rsDriver(browser = "firefox",
+               verbose = T
+               )
+
+rD$server
+
+remDr <- rD[["client"]]
 
 
 
