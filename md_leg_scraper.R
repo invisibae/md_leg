@@ -15,8 +15,7 @@ library(janitor)
 library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
-##
-# library(wdman)
+
 
 
 
@@ -30,7 +29,6 @@ library(slackr)
 # library(RSelenium)
 
 # the broken bit
-binman::list_versions("seleniumserver")
 
 rD <- rsDriver(browser = "firefox",
                verbose = T,
