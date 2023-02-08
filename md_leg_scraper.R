@@ -36,7 +36,6 @@ rD <- rsDriver(browser = "firefox",
                chromever = NULL
                )
 
-rD$server
 
 remDr <- rD[["client"]]
 
