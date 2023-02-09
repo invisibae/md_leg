@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-docker_stuff
-keys
+.docker_stuff
+.keys
