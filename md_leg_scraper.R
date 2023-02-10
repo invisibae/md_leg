@@ -128,6 +128,12 @@ get_sponsors <- function(bill_url) {
   
 } 
 
+
+
+
+
+
+
 # parallelize operations 
 # makes this thing go way faster
 plan(multisession, workers = 75)
@@ -170,11 +176,9 @@ write_rds(test_table, "data/old_table.rds")
 
 # authenticate gs4 
 
-gs4_deauth()
 
-gs4_auth(
-  path = jsonlite::fromJSON(Sys.getenv("KEY")))
 
+gs4_auth(path = "/Users/gregorymorton/Documents/GitHub/md_leg/keys/md-house-google-credential.json")
 
 
 
