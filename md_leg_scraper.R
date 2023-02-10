@@ -15,6 +15,7 @@ library(janitor)
 library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
+library(jsonlite)
 
 
 
@@ -168,6 +169,9 @@ write_rds(test_table, "data/old_table.rds")
 # Update slack with info on new/changed bills  ----------------------------
 
 # authenticate gs4 
+
+gs4_deauth()
+
 gs4_auth(
   path = jsonlite::fromJSON(Sys.getenv("KEY")))
 
