@@ -178,7 +178,7 @@ write_rds(test_table, "data/old_table.rds")
 
 
 
-gs4_auth(path = "/Users/gregorymorton/Documents/GitHub/md_leg/keys/md-house-google-credential.json")
+gs4_auth(path = "keys/md-house-google-credential.json")
 
 
 
