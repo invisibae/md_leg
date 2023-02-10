@@ -177,8 +177,11 @@ write_rds(test_table, "data/old_table.rds")
 # authenticate gs4 
 
 
+gs4_deauth()
 
-gs4_auth(path = "keys/md-house-google-credential.json")
+gs4_auth(
+         path = "keys/md-house-google-credential.json"
+         )
 
 
 
