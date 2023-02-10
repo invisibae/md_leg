@@ -4,7 +4,7 @@ library(dplyr)
 library(stringr)
 library(readr)
 # for accessing the site 
-library(RSelenium)
+# library(RSelenium)
 # for scraping table
 library(rvest)
 # for parallel operations 
@@ -19,7 +19,6 @@ library(slackr)
 
 
 
-
 # start scraping  --------------------------------------------------------
 # suppressWarnings(tryCatch(rm(remDr),error=function(e){}))
 # suppressWarnings(tryCatch(rD),error=function(e){})
@@ -29,17 +28,17 @@ library(slackr)
 # library(RSelenium)
 
 # the broken bit
-
-rD <- rsDriver(browser = "firefox",
-               verbose = T,
-               chromever = NULL,
-               )
-
-
-remDr <- rD[["client"]]
-
-
-
+# 
+# rD <- rsDriver(browser = "firefox",
+#                verbose = T,
+#                chromever = NULL,
+#                )
+# 
+# 
+# remDr <- rD[["client"]]
+# 
+# 
+# 
 
 
 ## break glass in case of emergencies: 
@@ -63,13 +62,13 @@ remDr <- rD[["client"]]
 
 base_url <- "https://mgaleg.maryland.gov/mgawebsite/Legislation/Index/house"
 
-remDr$navigate(base_url)
+# remDr$navigate(base_url)
 
 # save page html and grab the table 
-Sys.sleep(2) 
+# Sys.sleep(2) 
 
 
-base_html <- remDr$getPageSource()[[1]]
+# base_html <- remDr$getPageSource()[[1]]
 
 
 
@@ -169,7 +168,11 @@ write_rds(test_table, "data/old_table.rds")
 # Update slack with info on new/changed bills  ----------------------------
 
 # authenticate gs4 
-gs4_auth(path = "keys/md-house-google-credential.json")
+gs4_auth(
+  path = jsonlite::fromJSON(Sys.getenv("KEY")))
+
+
+
 
 # overwrite sheets
 sheet_write(test_table, 
@@ -181,6 +184,8 @@ sheet_write(new_stuff,
             ss = Sys.getenv("DOC_URL"),
             sheet = "new_stuff_and_changes"
             )
+
+
 
 
 # define message to post to slack 
@@ -212,7 +217,7 @@ if (identical(test_table, old_table) == FALSE) {
 
 # Shut our ports down and close out the show ---------------------------------------
 # this one stops the session so we can re-use the port 
-rD$server$stop()
+# rD$server$stop()
 
 
 
