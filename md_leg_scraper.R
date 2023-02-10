@@ -187,12 +187,12 @@ gs4_auth(
 
 # overwrite sheets
 sheet_write(test_table, 
-           ss = Sys.getenv("DOC_URL"),
+           ss = "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg",
            sheet = "all_current_bills"
            )
 
 sheet_write(new_stuff, 
-            ss = Sys.getenv("DOC_URL"),
+            ss = "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg",
             sheet = "new_stuff_and_changes"
             )
 
@@ -201,7 +201,7 @@ sheet_write(new_stuff,
 
 # define message to post to slack 
 
-doc <- Sys.getenv("DOC_URL")
+doc <- "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg"
 
 message <- 
   paste0("New info on", " ", nrow(new_stuff)," bill(s).", " Read more here:", " ", doc)
