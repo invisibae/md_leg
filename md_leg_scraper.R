@@ -201,7 +201,9 @@ sheet_write(new_stuff,
 
 # define message to post to slack 
 
-doc <- "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg"
+doc <- "https://docs.google.com/spreadsheets/d/1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg/edit?usp=sharing"
+
+
 
 message <- 
   paste0("New info on", " ", nrow(new_stuff)," bill(s).", " Read more here:", " ", doc)
