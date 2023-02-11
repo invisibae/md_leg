@@ -2,8 +2,8 @@ name: md_house
 
 on:
   push:
-  schedule:
-  - cron: "0 8-18 * * *" # runs every hour from 8 am - 6 pm
+  #schedule:
+  # - cron: "0 8-18 * * *" # runs every hour from 8 am - 6 pm
 
 jobs:
   autoscrape:
