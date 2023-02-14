@@ -21,15 +21,13 @@ library(jsonlite)
 
 
 # start scraping  --------------------------------------------------------
-# suppressWarnings(tryCatch(rm(remDr),error=function(e){}))
-# suppressWarnings(tryCatch(rD),error=function(e){})
-# gc()
 
 #relaunch
 # library(RSelenium)
-
-# the broken bit
 # 
+
+# We're gonna have to start the server at the beginning of the session so we can continue to use the broswer further down (Unfinished)
+
 # rD <- rsDriver(browser = "firefox",
 #                verbose = T,
 #                chromever = NULL,
@@ -37,9 +35,9 @@ library(jsonlite)
 # 
 # 
 # remDr <- rD[["client"]]
-# 
-# 
-# 
+
+
+
 
 
 ## break glass in case of emergencies: 
@@ -129,9 +127,29 @@ get_sponsors <- function(bill_url) {
 } 
 
 
+# Functions to grab bill subjects ((nfinished)
 
+# get_subjects <- function(bill_url) {
+#   
+#   
+#   
+# }
 
+# Functions to grab text (Unfinished)
 
+# get_text <- function(bill_url) {
+#   
+#   
+#   
+# }
+
+# Here we need to write a command to click a relevant button on the bill's detail page (Unfinished)
+
+# click_button_and_grab_text <- function(bill_url) {
+#   
+#   bill_url %>% 
+#     
+# }
 
 
 # parallelize operations 
@@ -144,6 +162,8 @@ test_table <- test_table %>%
   mutate(synopsis = as.character(future_map(test_table$page_url, get_synopsis)),
          leg_history = as.character(future_map(test_table$page_url, get_detail_1)),
          sponsors = as.character(future_map(test_table$page_url, get_sponsors))
+         # need another column for full bill text
+         # need another column for bill subjects 
   ) %>% 
   clean_names()
 
@@ -154,13 +174,12 @@ test_table <- test_table %>%
 old_table <- read_rds("data/old_table.rds")
 
 
-# perform anti-join
+# perform anti-join (can we be doing this better?)
 new_stuff <- 
   test_table %>% 
   anti_join(old_table)
 
 # write csv file to replace the one in the 'data' folder ------------------
-
 fold <- 'data/'
 
 # get all files in the directories, recursively
@@ -218,7 +237,7 @@ if (identical(test_table, old_table) == FALSE) {
              reply_broadcast = FALSE
   )
 } else {
-  slackr_msg(txt = "No new updates :cry:",
+  slackr_msg(txt = paste0("No new updates :cry:",", check out the full list of bills here: ", doc),
              token = Sys.getenv("SLACK_TOKEN"),
              channel = Sys.getenv("SLACK_CHANNEL"),
              username = Sys.getenv("SLACK_USERNAME"),
