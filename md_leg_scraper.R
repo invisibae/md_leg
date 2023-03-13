@@ -4,7 +4,7 @@ library(dplyr)
 library(stringr)
 library(readr)
 # for accessing the site 
-# library(RSelenium)
+library(RSelenium)
 # for scraping table
 library(rvest)
 # for parallel operations 
@@ -16,28 +16,24 @@ library(googlesheets4)
 # for sending messages to slack 
 library(slackr)
 library(jsonlite)
-
-
+library(pdftools)
+library(jsonlite)
 
 
 # start scraping  --------------------------------------------------------
 
-#relaunch
-# library(RSelenium)
-# 
-
 # We're gonna have to start the server at the beginning of the session so we can continue to use the broswer further down (Unfinished)
 
 # rD <- rsDriver(browser = "firefox",
-#                verbose = T,
+#                verbose = F,
 #                chromever = NULL,
 #                )
 # 
 # 
 # remDr <- rD[["client"]]
-
-
-
+# 
+# 
+# remDrclose
 
 
 ## break glass in case of emergencies: 
@@ -45,13 +41,16 @@ library(jsonlite)
 # for a very worst case where we forget to close the server 
 # 
 # rD <- rsDriver()
-# rm(rD)
 
+
+# remDr$stop()
 # this one stops the session so we can re-use the port
 # rD$server$stop()
 
 # this one closes the browser window
 # remDr$close()
+
+
 
 
 # our scraper elements ---------------------------------------------------------
@@ -61,32 +60,12 @@ library(jsonlite)
 
 base_url <- "https://mgaleg.maryland.gov/mgawebsite/Legislation/Index/house"
 
-# remDr$navigate(base_url)
 
 # save page html and grab the table 
 # Sys.sleep(2) 
 
 
-# base_html <- remDr$getPageSource()[[1]]
-
-
-
-test_table <- read_html(base_url) %>% 
-  html_table() %>% 
-  .[[2]] 
-
-
-# let's get bill url's so we can get detail page info
-# url structure is fairly easy 
-test_table <- 
-  test_table %>% 
-  mutate(house_bill = word(`Bill/Chapter  (Cross/Chapter)`, 1),
-         page_url = paste0("https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/", 
-                           house_bill, "?ys=2023RS"))
-
-# we've now scraped the entire table 
-# but we're not done 
-# lets grab some additional information from the page associated with each bill 
+# Functions  --------------------------------------------------------------
 
 # write some functions to get additional relevant info from bill page 
 
@@ -126,31 +105,121 @@ get_sponsors <- function(bill_url) {
   
 } 
 
+test_table %>% 
+  clean_names %>% 
+  group_by(current_status) %>% 
+  count(sort = T)
+# Convert Bill text/fiscal note to text from pdf 
 
-# Functions to grab bill subjects ((nfinished)
+get_text<- function(our_pdf) {
+  
+pdf_path <- our_pdf
 
-# get_subjects <- function(bill_url) {
-#   
-#   
-#   
-# }
+txt_output <- pdftools::pdf_text(pdf_path) %>%
+  paste0(collapse = " ") %>%
+  paste0(collapse = " ") %>%
+  stringr::str_squish() 
 
-# Functions to grab text (Unfinished)
+return(txt_output)
+}
 
-# get_text <- function(bill_url) {
-#   
-#   
-#   
-# }
+# Get bill status 
+# problems: too computationally expensive. Selenium forces me to navigate to every page and get each element one page at a time. Need to find a way to cut this down
+get_status <- function(detail_url) {
+  
+  # open server
+  rD <- rsDriver(browser = "firefox",
+                 verbose = F,
+                 chromever = NULL,
+  )
+  
+  # make remDr object that we can use to navigate and grab page source 
+  remDr <- rD[["client"]]
+  
+  # navigate to url so the javascript can load
+  remDr$navigate(detail_url)
+  
+  # let the page load
+  Sys.sleep(time = 2)
+  
+  # find status element 
+  elems <- remDr$findElements(using = 'xpath',
+                   '//*[contains(concat( " ", @class, " " ), concat( " ", "active", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "label", " " ))]') 
+  # grab it
+  elem <- elems[[1]]
+  
+  # save it as text
+  status <- elem$getElementText()[[1]]
 
-# Here we need to write a command to click a relevant button on the bill's detail page (Unfinished)
+  
+  # shut down the server 
+  
+  remDr$quit()
+  rD$server$stop()
+  return(status)
+  
 
-# click_button_and_grab_text <- function(bill_url) {
-#   
-#   bill_url %>% 
-#     
-# }
+}
 
+get_status("https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/hb0002?ys=2023RS")
+
+
+# function for grabbing last character of string for pdf url
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
+
+
+
+# get html table 
+test_table <- read_html(base_url) %>% 
+  html_table() %>% 
+  .[[2]]
+
+
+# let's get bill url's so we can get detail page info
+# url structure is fairly easy 
+
+
+
+test_table <- 
+  test_table %>% 
+  mutate(house_bill = word(`Bill/Chapter  (Cross/Chapter)`, 1),
+         page_url = paste0("https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/", 
+                           house_bill, "?ys=2023RS"), 
+         leg_note_url = paste0("https://mgaleg.maryland.gov/2023RS/fnotes/",
+                               "bil_000",
+                               substrRight(house_bill, 1),
+                               "/",
+                               str_to_lower(house_bill),
+                               ".pdf"),
+         bill_text_url = paste0("https://mgaleg.maryland.gov/2023RS/bills/hb/",
+                                str_to_lower(house_bill),
+                                "f.pdf"
+                                ))  %>% 
+  clean_names() %>% 
+  mutate(chamber = case_when(str_detect(current_status, "In the House") ~ "house",
+                             str_detect(current_status, "In the Senate") ~ "senate"),
+         status = case_when(str_detect(current_status, "First Reading|Hearing|Rereferred to ") ~ "first_read",
+                            str_detect(current_status, "Second Reading") ~ "third_read",
+                            str_detect(current_status, "Third Reading") ~ "first_read_senate",
+                            str_detect(current_status, "Review") ~ "review_in_og_chamber",
+                            str_detect(current_status, "Conference") ~ "conf_cmte",
+                            str_detect(current_status, "Governor") ~ "on_gov_desk",
+                            str_detect(current_status, "Withdrawn") ~ "withdrawn",
+                            str_detect(current_status, "Unfavorable") ~ "died_in_cmte",
+                            str_detect(current_status, "Special Order") ~ "special_order",
+                            TRUE ~ "Other"
+                            ))
+
+
+test_table %>% 
+  filter((status != "first_read") + (chamber != "house") == 1) %>% 
+  View()
+
+test_json <- toJSON(x = test_table, dataframe = 'rows', pretty = T)
+
+write_json(test_json, "data/test_json.json")
 
 # parallelize operations 
 # makes this thing go way faster
@@ -159,13 +228,18 @@ plan(multisession, workers = 75)
 
 # add columns 
 test_table <- test_table %>% 
-  mutate(synopsis = as.character(future_map(test_table$page_url, get_synopsis)),
-         leg_history = as.character(future_map(test_table$page_url, get_detail_1)),
-         sponsors = as.character(future_map(test_table$page_url, get_sponsors))
-         # need another column for full bill text
-         # need another column for bill subjects 
+  head(10) %>% 
+  group_by(page_url) %>% 
+  mutate(synopsis = as.character(future_map(page_url, get_synopsis)),
+         leg_history = as.character(future_map(page_url, get_detail_1)),
+         sponsors = as.character(future_map(page_url, get_sponsors)),
+         # legislative_note = as.character(future_map(leg_note_url, get_text)),
+         # bill_tet = as.character(future_map(bill_text_url, get_text)),
+         bill_progress = as.character(future_map(page_url, get_status))
+         
   ) %>% 
   clean_names()
+
 
 # Do an anti-join to find out which bills have changed --------------------
 
