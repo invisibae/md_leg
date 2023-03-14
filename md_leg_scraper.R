@@ -17,7 +17,7 @@ library(googlesheets4)
 library(slackr)
 library(jsonlite)
 library(pdftools)
-library(jsonlite)
+
 
 
 # start scraping  --------------------------------------------------------
@@ -105,10 +105,19 @@ get_sponsors <- function(bill_url) {
   
 } 
 
-test_table %>% 
-  clean_names %>% 
-  group_by(current_status) %>% 
-  count(sort = T)
+# bill subjects 
+get_subjects <- function(bill_url) {
+  
+  subjects <- bill_url %>% 
+    read_html %>% 
+    html_nodes(xpath = '//*[(@id = "details-dropdown-content2")]//a') %>% 
+    html_text() %>% 
+    as.character()
+  
+  return(subjects)
+}
+
+
 # Convert Bill text/fiscal note to text from pdf 
 
 get_text<- function(our_pdf) {
@@ -123,7 +132,7 @@ txt_output <- pdftools::pdf_text(pdf_path) %>%
 return(txt_output)
 }
 
-# Get bill status 
+# Get bill status (redundant now, gonna get rid) 
 # problems: too computationally expensive. Selenium forces me to navigate to every page and get each element one page at a time. Need to find a way to cut this down
 get_status <- function(detail_url) {
   
@@ -161,9 +170,6 @@ get_status <- function(detail_url) {
 
 }
 
-get_status("https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/hb0002?ys=2023RS")
-
-
 # function for grabbing last character of string for pdf url
 substrRight <- function(x, n){
   substr(x, nchar(x)-n+1, nchar(x))
@@ -171,7 +177,13 @@ substrRight <- function(x, n){
 
 
 
-# get html table 
+
+# Start Scraping ----------------------------------------------------------
+
+# parallelize 
+plan(multisession, workers = 100)
+
+# grab our table 
 test_table <- read_html(base_url) %>% 
   html_table() %>% 
   .[[2]]
@@ -179,8 +191,6 @@ test_table <- read_html(base_url) %>%
 
 # let's get bill url's so we can get detail page info
 # url structure is fairly easy 
-
-
 
 test_table <- 
   test_table %>% 
@@ -212,57 +222,51 @@ test_table <-
                             TRUE ~ "Other"
                             ))
 
-
-test_table %>% 
-  filter((status != "first_read") + (chamber != "house") == 1) %>% 
-  View()
-
-test_json <- toJSON(x = test_table, dataframe = 'rows', pretty = T)
-
-write_json(test_json, "data/test_json.json")
-
-# parallelize operations 
-# makes this thing go way faster
-plan(multisession, workers = 75)
-
+# filter out stuff that's dead or stuck on first read (we can return to this later)
+test_table <- test_table %>% 
+  filter((status != "first_read") + (chamber != "house") == 1)
 
 # add columns 
 test_table <- test_table %>% 
-  head(10) %>% 
-  group_by(page_url) %>% 
   mutate(synopsis = as.character(future_map(page_url, get_synopsis)),
          leg_history = as.character(future_map(page_url, get_detail_1)),
          sponsors = as.character(future_map(page_url, get_sponsors)),
          # legislative_note = as.character(future_map(leg_note_url, get_text)),
-         # bill_tet = as.character(future_map(bill_text_url, get_text)),
-         bill_progress = as.character(future_map(page_url, get_status))
+         # bill_text = as.character(future_map(bill_text_url, get_text)),
+         # bill_progress = as.character(future_map(page_url, get_status)),
+         bill_subjects = future_map(page_url, get_subjects)
          
   ) %>% 
   clean_names()
+
+# convert to json
+test_json <- toJSON(x = test_table, dataframe = 'rows', pretty = T)
+
+write_json(test_json, "data/test_json.json")
 
 
 # Do an anti-join to find out which bills have changed --------------------
 
 # read in old version of our table 
 
-old_table <- read_rds("data/old_table.rds")
+# old_table <- read_rds("data/old_table.rds")
 
 
 # perform anti-join (can we be doing this better?)
-new_stuff <- 
-  test_table %>% 
-  anti_join(old_table)
+# new_stuff <- 
+#   test_table %>% 
+#   anti_join(old_table)
 
 # write csv file to replace the one in the 'data' folder ------------------
-fold <- 'data/'
+# fold <- 'data/'
 
 # get all files in the directories, recursively
-f <- list.files(fold, include.dirs = F, full.names = T, recursive = T)
+# f <- list.files(fold, include.dirs = F, full.names = T, recursive = T)
 # remove the files
-file.remove(f)
+# file.remove(f)
 
 # save our most recent table as the "old_table"
-write_rds(test_table, "data/old_table.rds")
+# write_rds(test_table, "data/old_table.rds")
 
 
 # Update slack with info on new/changed bills  ----------------------------
@@ -270,55 +274,55 @@ write_rds(test_table, "data/old_table.rds")
 # authenticate gs4 
 
 
-gs4_deauth()
-
-gs4_auth(
-         path = "keys/md-house-google-credential.json"
-         )
-
-
-
-# overwrite sheets
-sheet_write(test_table, 
-           ss = "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg",
-           sheet = "all_current_bills"
-           )
-
-sheet_write(new_stuff, 
-            ss = "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg",
-            sheet = "new_stuff_and_changes"
-            )
+# gs4_deauth()
+# 
+# gs4_auth(
+#          path = "keys/md-house-google-credential.json"
+#          )
+# 
+# 
+# 
+# # overwrite sheets
+# sheet_write(test_table, 
+#            ss = "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg",
+#            sheet = "all_current_bills"
+#            )
+# 
+# sheet_write(new_stuff, 
+#             ss = "1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg",
+#             sheet = "new_stuff_and_changes"
+#             )
 
 
 
 
 # define message to post to slack 
+# 
+# doc <- "https://docs.google.com/spreadsheets/d/1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg/edit?usp=sharing"
+# 
 
-doc <- "https://docs.google.com/spreadsheets/d/1Y2MW_7ttg4ROgbbi0p5zJGme32hlqmem85zzpHrCKKg/edit?usp=sharing"
 
-
-
-message <- 
-  paste0("New info on", " ", nrow(new_stuff)," bill(s).", " Read more here:", " ", doc)
-
-# Post to slack 
-if (identical(test_table, old_table) == FALSE) {
-  slackr_msg(txt = message,
-             token = Sys.getenv("SLACK_TOKEN"),
-             channel = Sys.getenv("SLACK_CHANNEL"),
-             username = Sys.getenv("SLACK_USERNAME"),
-             thread_ts = NULL,
-             reply_broadcast = FALSE
-  )
-} else {
-  slackr_msg(txt = paste0("No new updates :cry:",", check out the full list of bills here: ", doc),
-             token = Sys.getenv("SLACK_TOKEN"),
-             channel = Sys.getenv("SLACK_CHANNEL"),
-             username = Sys.getenv("SLACK_USERNAME"),
-             thread_ts = NULL,
-             reply_broadcast = FALSE)
-  
-}
+# message <- 
+#   paste0("New info on", " ", nrow(new_stuff)," bill(s).", " Read more here:", " ", doc)
+# 
+# # Post to slack 
+# if (identical(test_table, old_table) == FALSE) {
+#   slackr_msg(txt = message,
+#              token = Sys.getenv("SLACK_TOKEN"),
+#              channel = Sys.getenv("SLACK_CHANNEL"),
+#              username = Sys.getenv("SLACK_USERNAME"),
+#              thread_ts = NULL,
+#              reply_broadcast = FALSE
+#   )
+# } else {
+#   slackr_msg(txt = paste0("No new updates :cry:",", check out the full list of bills here: ", doc),
+#              token = Sys.getenv("SLACK_TOKEN"),
+#              channel = Sys.getenv("SLACK_CHANNEL"),
+#              username = Sys.getenv("SLACK_USERNAME"),
+#              thread_ts = NULL,
+#              reply_broadcast = FALSE)
+#   
+# }
 
 
 # Shut our ports down and close out the show ---------------------------------------
