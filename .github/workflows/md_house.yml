@@ -49,6 +49,7 @@ jobs:
           R -e 'install.packages("remotes")'
           R -e 'install.packages("binman")'   
           R -e 'install.packages("jsonlite")'  
+          R -e 'install.packages("pdftools")'
       - name: Cache R packages
         uses: actions/cache@v2
         with:
